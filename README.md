@@ -33,13 +33,19 @@ This project uses the Brazilian E-commerce Public Dataset by Olist, containing i
 pip install -r requirements.txt
 ```
 
-2. Ensure MySQL is running:
+2. Install the Ansible MySQL collection:
+
+```bash
+ansible-galaxy collection install community.mysql
+```
+
+3. Ensure MySQL is running:
 
 ```bash
 sudo service mysql start
 ```
 
-3. Download the dataset from [Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce?resource=download) and extract it to the `archive` directory
+4. Download the dataset from [Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce?resource=download) and extract it to the `archive` directory
 
 ### Creating the Database
 

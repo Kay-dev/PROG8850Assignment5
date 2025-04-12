@@ -60,3 +60,24 @@
       command: python "{{ project_dir }}/loaddata.py"
       args:
         chdir: "{{ project_dir }}"
+        
+    # Create indexes for performance improvement
+    - name: Create index on order_purchase_timestamp for date range queries
+      mysql_query:
+        login_db: "{{ db_name }}"
+        login_user: "{{ db_user }}"
+        login_password: "{{ db_password }}"
+        login_host: "127.0.0.1"
+        query: "CREATE INDEX idx_order_purchase_timestamp ON orders(order_purchase_timestamp);"
+      become: yes
+      ignore_errors: yes
+      
+    - name: Create FULLTEXT index on review_comment_message for text search
+      mysql_query:
+        login_db: "{{ db_name }}"
+        login_user: "{{ db_user }}"
+        login_password: "{{ db_password }}"
+        login_host: "127.0.0.1"
+        query: "ALTER TABLE order_reviews ADD FULLTEXT INDEX idx_review_fulltext (review_comment_message);"
+      become: yes
+      ignore_errors: yes

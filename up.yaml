@@ -47,6 +47,15 @@
         query: "{{ lookup('file', project_dir + '/orders.sql') }}"
       become: yes
 
+    - name: Create order_reviews table
+      mysql_query:
+        login_db: "{{ db_name }}"
+        login_user: "{{ db_user }}"
+        login_password: "{{ db_password }}"
+        login_host: "127.0.0.1"
+        query: "{{ lookup('file', project_dir + '/order_reviews.sql') }}"
+      become: yes
+
     - name: Import orders data using Python script
       command: python "{{ project_dir }}/loaddata.py"
       args:

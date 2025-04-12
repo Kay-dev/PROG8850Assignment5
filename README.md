@@ -1,36 +1,83 @@
-# PROG8850 Assignment 5
-environment with mysql, python, node and docker
+# Database Query Performance Testing
 
-TLDR;
+This repository demonstrates database query performance testing using MySQL, Ansible, and Python. The project focuses on creating database schemas, importing data, testing query performance, and optimizing with indexes.
+
+## Repository Contents
+
+- `up.yaml`: Ansible playbook to create database, tables, and indexes
+- `down.yaml`: Ansible playbook to clean up resources
+- `orders.sql` & `order_reviews.sql`: SQL table definitions
+- `loadOrders.sql`: SQL commands to load data from CSV files
+- `loaddata.py`: Python script to import data
+- `test.py`: Script to test query performance
+- `requirements.txt`: Project dependencies
+
+## Dataset
+
+This project uses the Brazilian E-commerce Public Dataset by Olist, containing information on 100,000+ orders from 2016 to 2018 across multiple dimensions like customer info, payment details, order status, reviews, and products.
+
+## Setup Instructions
+
+### Prerequisites
+
+- MySQL/MariaDB
+- Python 3.x
+- Ansible
+- Dataset files in the `archive` directory
+
+### Installation
+
+1. Install dependencies:
 
 ```bash
 pip install -r requirements.txt
+```
+
+2. Ensure MySQL is running:
+
+```bash
 sudo service mysql start
 ```
 
-To access database:
+3. Download the dataset from [Kaggle](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce?resource=download) and extract it to the `archive` directory
+
+### Creating the Database
+
+Run the Ansible playbook to set up the database:
 
 ```bash
-sudo mysql -u root
+ansible-playbook up.yaml
 ```
 
-Download `archive.zip`, a dataset of ~100,000 ecommerce orders from [here](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce?resource=download) using your google id. Make a mysql database using ansible to create the schema and import the data from the .csv files. Make some tests that time queries on amount and other scalar fields in te database.
+This will:
+- Create the database and user
+- Create tables for orders and reviews
+- Import data from CSV files
+- Create indexes for optimized performance
 
-Use the `MATCH () ... AGAINST` syntax to test some full text searches and time them as well.
+## Testing Query Performance
 
-Use EXPLAIN to investigate how your searches are being run.
+Run the test script to measure query performance:
 
-Create indexes and re-run your tests and timings. Make some notes and commit them to this repository of who would be interested in running your searches and what their goals are. Note how your performance improvements would help them achieve their goals.
+```bash
+python test.py
+```
 
-## Marking
+The script tests:
 
-|Item|Out Of|
-|--|--:|
-|up.yaml creating the database|1|
-|up.yaml loading csv data|2|
-|tests of scalar fields like amounts|2|
-|tests of full text searches|2|
-|up.yaml to create indices|2|
-|explanation of searches, goals and outcomes of indexing|1|
-|||
-|total|10|
+1. **Scalar field query**: Measures the performance of retrieving orders within a date range, demonstrating the performance impact of the index on `order_purchase_timestamp`
+
+2. **Full-text search**: Compares two methods for searching text in reviews:
+   - Using the `LIKE` operator (without a specialized index)
+   - Using `MATCH() AGAINST()` syntax with a FULLTEXT index
+
+
+## Cleanup
+
+To remove all created resources:
+
+```bash
+ansible-playbook down.yaml
+```
+
+This will drop the database and remove the user, cleaning up all resources created by the setup process.

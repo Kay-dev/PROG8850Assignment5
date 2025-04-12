@@ -1,0 +1,61 @@
+---
+- name: Setup database and import data
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+
+  vars:
+    db_name: order_db
+    db_user: dbowner
+    db_password: Secret5555
+    project_dir: "{{ playbook_dir }}"
+    csv_dir: "{{ playbook_dir }}/archive"
+
+  tasks:
+    - name: Install required packages
+      package:
+        name:
+          - mysql-server
+          - python3-pip
+          - python3-mysqldb
+        state: present
+
+    - name: Ensure pip packages are installed
+      pip:
+        name:
+          - mysql-connector-python
+        state: present
+
+    - name: Ensure MySQL service is running
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+      
+    - name: Create database and user
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Create database user
+      mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        host: "127.0.0.1"
+        priv: "{{ db_name }}.*:ALL"
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Create orders table
+      mysql_query:
+        login_db: "{{ db_name }}"
+        login_user: "{{ db_user }}"
+        login_password: "{{ db_password }}"
+        login_host: "127.0.0.1"
+        query: "{{ lookup('file', project_dir + '/orders.sql') }}"
+
+    - name: Import orders data using Python script
+      command: python "{{ project_dir }}/loaddata.py"
+      args:
+        chdir: "{{ project_dir }}"

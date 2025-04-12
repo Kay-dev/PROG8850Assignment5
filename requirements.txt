@@ -1,1 +1,4 @@
 mysql-connector-python
+ansible-core
+python3-mysqldb
+python3-pip

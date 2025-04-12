@@ -1,0 +1,44 @@
+---
+- name: Clean up database resources
+  hosts: localhost
+
+  vars:
+    db_user: dbowner
+    db_password: Secret5555
+    db_name: order_db
+    project_dir: "{{ playbook_dir }}"
+    csv_dir: "{{ playbook_dir }}/archive"
+
+  tasks:
+    - name: Ensure MySQL service is running
+      service:
+        name: mysql
+        state: started
+        enabled: true
+      ignore_errors: yes
+
+    # Drop the database first
+    - name: Drop database
+      mysql_db:
+        name: "{{ db_name }}"
+        state: absent
+        login_user: root
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      become: yes
+      ignore_errors: yes
+      
+    # Remove the database user
+    - name: Remove database user
+      mysql_user:
+        name: "{{ db_user }}"
+        host: "127.0.0.1"
+        state: absent
+        login_user: root
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        connect_timeout: 30
+      become: yes
+      ignore_errors: yes
+      
+    - name: Print cleanup message
+      debug:
+        msg: "Database {{ db_name }} and user {{ db_user }} have been removed."

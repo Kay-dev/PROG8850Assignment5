@@ -27,17 +27,27 @@ def run_timed_query(description, query, params=None):
 
 def test_scalar_fields():
     print("\n========== TESTING SCALAR FIELD QUERIES ==========")
-    query = "SELECT AVG(order_id) as avg_order_id FROM orders"
-    return run_timed_query("Average order id", query)
+    # Test: Order amount from 2017-01-01 to 2017-12-31
+    query = "SELECT SUM(order_id) as total_order_id FROM orders WHERE order_purchase_timestamp BETWEEN '2017-01-01' AND '2017-12-31'"
+    return run_timed_query("Total order id", query)
 
 def test_fulltext_search():
     print("\n========== TESTING FULL-TEXT SEARCH QUERIES ==========")
+
+    # Test: Without full-text index
+    query = """SELECT review_id, order_id, review_score, LEFT(review_comment_message, 50) as snippet 
+              FROM order_reviews 
+              WHERE review_comment_message LIKE %s"""
+    params = ("%super%",)
+    res1 = run_timed_query("Reviews containing 'super' (no index)", query, params)
+
     # Test: MATCH...AGAINST
     query = """SELECT review_id, order_id, review_score, LEFT(review_comment_message, 50) as snippet 
               FROM order_reviews 
               WHERE MATCH(review_comment_message) AGAINST(%s IN NATURAL LANGUAGE MODE)"""
-    params = ("excellent",)
-    return run_timed_query("Reviews containing 'excellent'", query, params)
+    params = ("super",)
+    res2 = run_timed_query("Reviews containing 'super'", query, params)
+    return res1, res2
 
 def test_all():
     try:

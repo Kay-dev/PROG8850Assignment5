@@ -15,13 +15,8 @@ def run_timed_query(description, query, params=None):
     # Time the actual query
     start_time = time.time()
     cursor.execute(query, params)
-    results = cursor.fetchall()
     end_time = time.time()
-    
     execution_time = end_time - start_time
-    row_count = len(results)
-    
-    print(f"Found {row_count} results in {execution_time:.6f} seconds")
     
     return execution_time
 
@@ -51,11 +46,11 @@ def test_fulltext_search():
 
 def test_all():
     try:
-        print("\n========== TESTING ALL QUERIES ==========")
         scalar_results = test_scalar_fields()
         fulltext_results = test_fulltext_search()
         print(f"Scalar field queries: {scalar_results:.6f} seconds")
-        print(f"Full-text search queries: {fulltext_results:.6f} seconds")
+        print(f"Full-text search queries without full-text index: {fulltext_results[0]:.6f} seconds")
+        print(f"Full-text search queries with full-text index: {fulltext_results[1]:.6f} seconds")
     except Exception as e:
         print(f"Error: {e}")
         return {"scalar": None, "fulltext": None}
